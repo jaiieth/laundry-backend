@@ -18,7 +18,6 @@ import {
   IUpdateTechnician,
   IUpdateUser,
 } from "./interface";
-import { id } from "fp-ts/lib/Refinement";
 
 export const prisma = new PrismaClient();
 

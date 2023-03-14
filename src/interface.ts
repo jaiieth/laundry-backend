@@ -5,7 +5,6 @@ import {
   SizeEnum,
 } from "@prisma/client";
 import * as t from "io-ts";
-import * as td from "io-ts-types";
 import { optional, strict } from "io-ts-extra";
 
 export const createFranchiseeCodec = t.type({
