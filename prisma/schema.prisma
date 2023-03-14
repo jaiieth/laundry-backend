@@ -1,62 +1,145 @@
-model User {
-  id               Int             @id @default(autoincrement())
-  username         String          @unique
-  profileImage     String?
-  sentMessages     DirectMessage[] @relation("sentMessages")
-  receivedMessages DirectMessage[] @relation("receivedMessages")
-  tweets           Tweet[]         @relation("Tweet")
-  likedTweets      Tweet[]         @relation("LikeTweet")
-  // likedReplys        TweetReply[]    @relation("LikeReply")
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  followings       User[]          @relation("Following")
-  followers        User[]          @relation("Following")
+model Branch {
+  id           Int         @id @default(autoincrement())
+  franchisee   Franchisee? @relation(fields: [franchiseeId], references: [id])
+  franchiseeId Int?
+  location     String
+  size         SizeEnum
+  machines     Machine[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 }
 
-model Tweet {
+enum SizeEnum {
+  S
+  M
+  L
+  XL
+}
+
+model Franchisee {
+  id          Int      @id @default(autoincrement())
+  name        String
+  phoneNumber String
+  branches    Branch[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Machine {
+  id                     Int             @id @default(autoincrement())
+  type                   MachineTypeEnum
+  size                   Float
+  brand                  String
+  model                  String
+  mfd                    DateTime
+  warrantyExpirationDate DateTime
+  branch                 Branch?         @relation(fields: [branchId], references: [id])
+  branchId               Int?
+  modes                  Mode[]
+  maintenances           Maintenance[]
+  usages                 Usage[]
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+}
+
+enum MachineTypeEnum {
+  WASHER_FRONT
+  WASHER_TOP
+  DRYER
+}
+
+model Mode {
   id        Int       @id @default(autoincrement())
-  message   String
-  hashtags  Hashtag[]
-  // replys    TweetReply[]
-  user      User      @relation("Tweet", fields: [userId], references: [id])
-  userId    Int
-  likedBy   User[]    @relation("LikeTweet")
-  replyBy   Tweet[]   @relation("TweetReply")
-  replyTo   Tweet[]   @relation("TweetReply")
+  mode      ModeEnum
+  duration  Int
+  weight    Int
+  price     Float
+  machines  Machine[]
+  usages    Usage[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
+  @@unique([mode, duration, weight, price])
 }
 
-model Hashtag {
-  id        Int      @id @default(autoincrement())
-  hashtag   String   @unique
-  tweets    Tweet[]
-  // tweetReplys TweetReply[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Maintenance {
+  id          Int                  @id @default(autoincrement())
+  level       MaintenanceLevelEnum
+  cause       String
+  technicians technician[]
+  machine     Machine?             @relation(fields: [machineId], references: [id])
+  machineId   Int
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
 }
 
-// model TweetReply {
-//   id            Int       @id @default(autoincrement())
-//   message       String
-//   tweet         Tweet     @relation(fields: [tweetId], references: [id])
-//   tweetId       Int
-//   createdAt     DateTime  @default(now())
-//   updatedAt     DateTime  @updatedAt
-//   likedBy       User?     @relation("LikeReply", fields: [likedByUserId], references: [id])
-//   likedByUserId Int?
-//   hashtags      Hashtag[]
-// }
+enum MaintenanceLevelEnum {
+  MINOR
+  MAJOR
+  SCHEDULE
+}
 
-model DirectMessage {
+model technician {
+  id          Int           @id @default(autoincrement())
+  username    String        @unique
+  firstName   String
+  lastName    String
+  phoneNumber String
+  joinDate    DateTime
+  maintenance Maintenance[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+enum ModeEnum {
+  QUICK_WASH
+  DELICATE_WASH
+  COLD_WASH
+  WARM_WASH
+  HOT_WASH
+  SOFT_WASH
+  HEAVY_WASH
+  WOOL
+  COLD_DRY
+  WARM_DRY
+  HOT_DRY
+  CLEAN
+}
+
+model User {
+  id              Int             @id @default(autoincrement())
+  username        String          @unique
+  name            String
+  phoneNumber     String
+  balance         Float           @default(0)
+  refillHistories refillHistory[]
+  usages          Usage[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model Usage {
   id         Int      @id @default(autoincrement())
-  message    String
-  fromUser   User     @relation("sentMessages", fields: [fromUserId], references: [id])
-  fromUserId Int
-  toUser     User     @relation("receivedMessages", fields: [toUserId], references: [id])
-  toUserId   Int
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int
+  machine    Machine  @relation(fields: [machineId], references: [id])
+  machineId  Int
+  mode       Mode     @relation(fields: [modeId], references: [id])
+  modeId     Int
+  price      Float
+  startTime  DateTime
+  finishTime DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model refillHistory {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  amount    Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 generator client {
@@ -65,5 +148,5 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL_TWITTER")
+  url      = env("DATABASE_URL_LAUNDRY")
 }

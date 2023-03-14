@@ -9,7 +9,7 @@
     "prisma:migrate": "yarn prisma migrate dev --name init --schema prisma/schema.prisma",
     "prisma:generate": "yarn pnpify prisma generate --schema=prisma/schema.prisma",
     "test": "jest --verbose",
-    "test:twitter": "jest -- src/TwitterAPI"
+    "test:laundry": "jest -- src/"
   },
   "dependencies": {
     "@prisma/client": "^4.11.0",
@@ -20,6 +20,7 @@
     "fp-ts": "^2.13.1",
     "io-ts": "^2.2.20",
     "io-ts-extra": "^0.11.6",
+    "io-ts-types": "^0.5.19",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.1.2"
   },
